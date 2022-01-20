@@ -2,14 +2,18 @@ import argparse
 import os
 import pandas as pd
 import glob
+import csv
 
 
 def merge_csvs(input_folder, output_filepath, should_log):
+    if should_log:
+        print(f'merge_csvs: merge_csvs: input_folder: {input_folder}')
     all_files = glob.glob(input_folder + "/*.csv")
-    file_dataframes = (pd.read_csv(file, sep=",")
+    file_dataframes = (pd.read_csv(file, sep=",", keep_default_na=False)
                        for file in all_files)
     merged_files = pd.concat(file_dataframes)
-    merged_files.to_csv(output_filepath, index=False, encoding="utf-8")
+    merged_files.to_csv(output_filepath, index=False,
+                        encoding="utf-8", quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
     if (should_log):
         print('merge_csvs.py: merge_csvs complete')
 
@@ -23,11 +27,11 @@ def dir_path(string):
         raise NotADirectoryError(string)
 
 
-def file_path(string):
-    if os.path.exists(string):
-        return string
-    else:
-        raise TypeError(string)
+# def file_path(string):
+#     if os.path.exists(string):
+#         return string
+#     else:
+#         raise TypeError(string)
 
 
 if __name__ == "__main__":
