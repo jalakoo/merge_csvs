@@ -3,11 +3,13 @@ import os
 import pandas as pd
 import glob
 import csv
+import logging
 
 
-def find_unique_keywords(input_folder, output_filepath, should_log):
-    if should_log:
-        print(f'merge_csvs: merge_csvs: input_folder: {input_folder}')
+def find_unique_keywords(input_folder, output_filepath, loglevel):
+    logging.basicConfig( level=loglevel )
+    logging.info( f'unique_keywords.py: find_unique_keywords: loglevel set to: {loglevel}' )
+    logging.info(f'merge_csvs: merge_csvs: input_folder: {input_folder}')
     all_files = glob.glob(input_folder + "/*.csv")
     file_dataframes = (pd.read_csv(file, sep=",", keep_default_na=False)
                        for file in all_files)
@@ -15,8 +17,7 @@ def find_unique_keywords(input_folder, output_filepath, should_log):
         file_dataframes).drop_duplicates().reset_index(drop=True)
     merged_files.sort_values(by='word').to_csv(output_filepath, index=False,
                                                encoding="utf-8", quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
-    if (should_log):
-        print('unique_keywords.py: merge_csvs complete')
+    logging.info('unique_keywords.py: merge_csvs complete')
 
 # Validate path argument
 
@@ -44,7 +45,9 @@ if __name__ == "__main__":
         "-i", '--input', help='Folder path of csv files to process', type=dir_path, default=default_input_path)
     parser.add_argument(
         "-o", '--output', help='Filepath of joined csv file', type=str, default=default_output_path)
-    parser.add_argument(
-        "-v", '--verbose', help='Log function outputs', type=bool, default=False)
+    parser.add_argument( '-l',
+            '--loglevel',
+            default='warning',
+            help='Console log level. Example --loglevel debug, default=warning' )
     args = parser.parse_args()
-    find_unique_keywords(args.input, args.output, args.verbose)
+    find_unique_keywords(args.input, args.output, args.loglevel.upper())
